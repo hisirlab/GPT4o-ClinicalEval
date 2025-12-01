@@ -44,6 +44,8 @@ Extracted metadata included:
 Question: {Question}  
 Options: {Option 1}, {Option 2}, {Option 3}, {Option 4}, ...
 ```
+## Copyright
+Copyright 2025 Yuhang Guo
 
 **Evaluation tasks include:**
 - Effectiveness evaluation
