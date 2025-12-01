@@ -44,11 +44,12 @@ Extracted metadata included:
 Question: {Question}  
 Options: {Option 1}, {Option 2}, {Option 3}, {Option 4}, ...
 ```
-## Copyright
-Copyright 2025 Yuhang Guo
 
 **Evaluation tasks include:**
 - Effectiveness evaluation
 - Logistic regression analysis of influencing factors
 - Image modality contribution evaluation
 - AI-assisted decision-making evaluation
+
+## Copyright
+Copyright 2025 Yuhang Guo
