@@ -17,6 +17,7 @@ import get_icd_acc
 import get_specialty_acc
 import get_region_acc
 import get_word_count_acc
+import get_image_pixel_acc
 
 def get_overall_acc_figure():
     """
@@ -1034,6 +1035,71 @@ def get_word_count_figure():
     plt.show()
     return fig
 
+def get_image_pixel_figure():
+    """
+    Generate a bar chart visualizing model accuracy across image pixel count groups.
+
+    1. Load pixel count data for individual journals (Lancet, NEJM, JAMA)
+    2. Combine all journal data into a unified dataset
+    3. Group pixel counts and calculate accuracy statistics
+    4. Prepare visualization data with color encoding based on case volume
+
+    Visualization
+    --------------------
+    • Bar Chart: Accuracy values for each pixel count group
+    • Color Encoding: Purple gradient indicates case count density
+    • x-axis: Pixel count groups in units of 100,000 pixels (e.g., "0-2" = 0-200,000 pixels)
+    • y-axis: Accuracy (0-1 scale)
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The generated figure object for further saving or customization.
+    """
+    Lancet_df = get_image_pixel_acc.get_image_pixel_acc('label summary.xlsx', 0, 11, 14)
+    NEJM_df = get_image_pixel_acc.get_image_pixel_acc('label summary.xlsx', 1, 11, 14)
+    JAMA_df = get_image_pixel_acc.get_image_pixel_acc('label summary.xlsx', 2, 11, 14)
+    all_df = get_image_pixel_acc.combine_pixel_df(NEJM_df, Lancet_df, JAMA_df)
+    all_result_image = get_image_pixel_acc.image_pixel_group(all_df)
+    pixel_group = np.array(all_result_image['pixel_group'])
+    accuracy = np.array(all_result_image['accuracy'])
+    case_count = np.array(all_result_image['case_count'])
+    right_case_count = np.array(all_result_image['right_case_count'])
+    x = np.arange(len(pixel_group))
+    group_start_vals = np.array([g for g in case_count])
+    norm = mcolors.Normalize(vmin=group_start_vals.min(), vmax=group_start_vals.max())
+    cmap = ListedColormap(cm.get_cmap('Purples')(np.linspace(0.3, 0.7, 256)))
+    bar_colors = []
+    for i, val in enumerate(case_count):
+        bar_colors.append(cmap(norm(val)))
+    fig, ax = plt.subplots(figsize=(22, 8))
+    bar_width = 0.9
+    bars = ax.bar(x, accuracy, bar_width, color=bar_colors)
+    for i, bar in enumerate(bars):
+        height = bar.get_height()
+        ax.text(bar.get_x() + + bar.get_width() / 2, height + 0.005, f'{height:.2f}',
+                ha='center', va='bottom', fontsize=24, color='black')
+        ax.text(bar.get_x() + + bar.get_width() / 2, height - 0.125, f'{right_case_count[i]}\n{case_count[i]}',
+                ha='center', va='bottom', fontsize=24, color='black')
+        ax.hlines(y=height - 0.06, xmin=bar.get_x() + 0.03, xmax=bar.get_x() + bar_width - 0.03, color='black',
+                  linewidth=2)
+    plt.ylim(0, 1)
+    cbar_ax = fig.add_axes([0.91, 0.28, 0.02, 0.5])
+    sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cbar = fig.colorbar(sm, cax=cbar_ax)
+    cbar.set_label('Case Count', fontsize=24)
+    cbar.ax.tick_params(labelsize=20)
+    ax.tick_params(axis='y', labelsize=28)
+    ax.set_xticks(x)
+    ax.set_xticklabels(pixel_group, fontsize=24, rotation=90)
+    ax.set_xlabel("Number of image pixels (×$10^5$)", fontsize=30, fontweight='bold')
+    ax.set_ylabel("Accuracy", fontsize=30, fontweight='bold')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    plt.show()
+    return fig
+
 def main():
     overall_acc_figure=get_overall_acc_figure()
     date_figure=get_date_figure()
@@ -1047,6 +1113,7 @@ def main():
     image_typy_figure=get_image_typy_figure()
     image_type_region_figure=get_image_type_region_figure()
     word_count_figure=get_word_count_figure()
+    image_pixel_figure=get_image_pixel_figure()
 
 
 if __name__ == "__main__":
